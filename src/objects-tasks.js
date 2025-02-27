@@ -292,8 +292,16 @@ function sortCitiesArray(arr) {
  *    "Poland" => ["Lodz"]
  *   }
  */
-function group(/* array, keySelector, valueSelector */) {
-  throw new Error('Not implemented');
+function group(array, keySelector, valueSelector) {
+  const map = new Map();
+  array.forEach((item) => {
+    const key = keySelector(item);
+    if (!map.has(key)) {
+      map.set(key, []);
+    }
+    map.get(key).push(valueSelector(item));
+  });
+  return map;
 }
 
 /**
@@ -351,32 +359,91 @@ function group(/* array, keySelector, valueSelector */) {
  */
 
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  selector: '',
+  hasElement: false,
+  hasId: false,
+  hasPseudoElement: false,
+  order: 0,
+  checkOrder(order) {
+    if (this.order > order) {
+      throw new Error(
+        'Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element'
+      );
+    }
+  },
+  element(value) {
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    this.checkOrder(1);
+    const obj = Object.create(this);
+    obj.selector += value;
+    obj.hasElement = true;
+    obj.order = 1;
+    return obj;
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    if (this.hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    this.checkOrder(2);
+    const obj = Object.create(this);
+    obj.selector += `#${value}`;
+    obj.hasId = true;
+    obj.order = 2;
+    return obj;
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    this.checkOrder(3);
+    const obj = Object.create(this);
+    obj.selector += `.${value}`;
+    obj.order = 3;
+    return obj;
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    this.checkOrder(4);
+    const obj = Object.create(this);
+    obj.selector += `[${value}]`;
+    obj.order = 4;
+    return obj;
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    this.checkOrder(5);
+    const obj = Object.create(this);
+    obj.selector += `:${value}`;
+    obj.order = 5;
+    return obj;
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector'
+      );
+    }
+    this.checkOrder(6);
+    const obj = Object.create(this);
+    obj.selector += `::${value}`;
+    obj.hasPseudoElement = true;
+    obj.order = 6;
+    return obj;
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const obj = Object.create(this);
+    obj.selector = `${selector1.stringify()} ${combinator} ${selector2.stringify()}`;
+    return obj;
+  },
+  stringify() {
+    return this.selector;
   },
 };
 
