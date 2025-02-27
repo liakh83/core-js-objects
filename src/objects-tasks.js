@@ -153,11 +153,14 @@ function sellTickets(queue) {
 
   return queue.every((ticket) => {
     cashBox[ticket] = (cashBox[ticket] || 0) + 1;
-    if (cashBox[50] > 0) {
-      cashBox[25] -= 1;
-      return true;
+    if (ticket === 50) {
+      if (cashBox[25] > 0) {
+        cashBox[25] -= 1;
+        return true;
+      }
+      return false;
     }
-    if (cashBox[100] > 0) {
+    if (ticket === 100) {
       if (cashBox[50] > 0 && cashBox[25] > 0) {
         cashBox[50] -= 1;
         cashBox[25] -= 1;
@@ -188,8 +191,14 @@ function sellTickets(queue) {
  *    console.log(r.height);      // => 20
  *    console.log(r.getArea());   // => 200
  */
-function Rectangle(/* width, height */) {
-  throw new Error('Not implemented');
+function Rectangle(width, height) {
+  return {
+    width,
+    height,
+    getArea() {
+      return width * height;
+    },
+  };
 }
 
 /**
@@ -202,8 +211,8 @@ function Rectangle(/* width, height */) {
  *    [1,2,3]   =>  '[1,2,3]'
  *    { height: 10, width: 20 } => '{"height":10,"width":20}'
  */
-function getJSON(/* obj */) {
-  throw new Error('Not implemented');
+function getJSON(obj) {
+  return JSON.stringify(obj);
 }
 
 /**
